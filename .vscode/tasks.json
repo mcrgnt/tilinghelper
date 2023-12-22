@@ -7,7 +7,7 @@
             "command": "build",
 			"args": [
 				"-o",
-				"..\\bin\\tilinghelper-${env:branch}.exe"
+				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}\\src"
