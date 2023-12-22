@@ -8,5 +8,5 @@ import (
 
 func main() {
 	w.Test()
-	fmt.Println("test")
+	fmt.Println("testetest")
 }
