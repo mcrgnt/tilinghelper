@@ -9,4 +9,5 @@ import (
 func main() {
 	w.Test()
 	fmt.Println("testetest")
+	fmt.Println("version")
 }
