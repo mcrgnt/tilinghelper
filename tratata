@@ -82,3 +82,4 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS=true
 GOPATH=C:\Users\xxx\go
 ProgramData=C:\ProgramData
 _=/usr/bin/env
+/usr/bin/echo
