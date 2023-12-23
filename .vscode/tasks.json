@@ -2,6 +2,13 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "clean bin",
+            "type": "shell",
+            "group": "build",
+            "command":"rm",
+            "args": ["bin\\*"]
+        },
+        {
             "type": "go",
             "label": "build default",
             "command": "build",
@@ -12,7 +19,10 @@
 			"options": {
 				"cwd": "${workspaceFolder}\\src"
 			},
-            "group": "build"
+            "group": "build",
+            "dependsOn":[
+                "clean bin"
+            ]
         }
     ]
 }
