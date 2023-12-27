@@ -10,9 +10,29 @@
         },
         {
             "type": "go",
-            "label": "build default",
+            "label": "build v1",
             "command": "build",
 			"args": [
+                "-tags",
+                "v1",
+				"-o",
+				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\src"
+			},
+            "group": "build",
+            "dependsOn":[
+                "clean bin"
+            ]
+        },
+        {
+            "type": "go",
+            "label": "build v0",
+            "command": "build",
+			"args": [
+                "-tags",
+                "v0",
 				"-o",
 				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
 			],
