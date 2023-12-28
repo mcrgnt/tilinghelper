@@ -3,12 +3,21 @@ package w
 import (
 	"fmt"
 	"tilinghelper/src/g"
-	"tilinghelper/src/p"
 	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+)
+
+var (
+	iter int = 0
+
+	colors = [][]float32{
+		{0.5, 0.6, 0.7},
+		{0.1, 0.2, 0.3},
+		{0.1, 0.5, 0.9},
+	}
 )
 
 func Terminate() {
@@ -44,7 +53,7 @@ func DrawSquare(window *glfw.Window, program uint32, vao uint32, pIndexes unsafe
 
 func DrawTriangle(window *glfw.Window, program uint32, vao uint32) {
 	defer glfw.PollEvents()
-	p.Validate(program)
+	//p.Validate(program)
 
 	var err error
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -59,6 +68,13 @@ func DrawTriangle(window *glfw.Window, program uint32, vao uint32) {
 	if err != nil {
 		println("ERR draw 2:", err.Error())
 		return
+	}
+
+	location := gl.GetUniformLocation(program, gl.Str("in_frag_colour"+"\x00"))
+	gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
+	iter++
+	if iter == 3 {
+		iter = 0
 	}
 
 	gl.BindVertexArray(vao)
@@ -84,7 +100,9 @@ func DrawTriangle(window *glfw.Window, program uint32, vao uint32) {
 }
 
 func createWindow(w, h int, title string) (window *glfw.Window, err error) {
-	if err = glfw.Init(); err != nil {
+	err = glfw.Init()
+	if err != nil {
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>")
 		return
 	}
 
@@ -111,7 +129,12 @@ func createWindow(w, h int, title string) (window *glfw.Window, err error) {
 	//window.SetAspectRatio(16, 9)
 	//SetFramebufferSizeCallback
 
-	//window.MakeContextCurrent()
+	window.MakeContextCurrent()
+	err = gl.Init()
+	if err != nil {
+		return
+	}
+	glfw.DetachCurrentContext()
 
 	return
 }

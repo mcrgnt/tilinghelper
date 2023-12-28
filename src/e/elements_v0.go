@@ -29,9 +29,10 @@ const (
 
 	fragmentShaderSource = `
 		#version 460
+		in vec3 in_frag_colour;
 		out vec4 frag_colour;
 		void main() {
-			frag_colour = vec4(1, 1, 1, 1.0);
+			frag_colour = vec4(in_frag_colour, 1.0);
 		}
 	` + "\x00"
 )
@@ -74,9 +75,24 @@ func GetVao(window *glfw.Window) (vao uint32, err error) {
 func compileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 
+	// if shaderType == gl.FRAGMENT_SHADER {
+	// 	name := gl.Str("in_frag_colour" + "\x00")
+	// 	location := gl.GetUniformLocation(shader, name)
+	// 	gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
+	// 	iter++
+	// }
+
 	csources, free := gl.Strs(source)
 	gl.ShaderSource(shader, 1, csources, nil)
 	free()
+
+	// if shaderType == gl.FRAGMENT_SHADER {
+	// 	name := gl.Str("in_frag_colour" + "\x00")
+	// 	location := gl.GetUniformLocation(program, name)
+	// 	gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
+	// 	iter++
+	// }
+
 	gl.CompileShader(shader)
 
 	var status int32

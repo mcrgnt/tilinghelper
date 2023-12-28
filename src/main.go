@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 	"runtime"
+	"time"
 
 	"tilinghelper/src/e"
-	"tilinghelper/src/g"
 	"tilinghelper/src/p"
 	"tilinghelper/src/w"
 
@@ -37,11 +37,6 @@ func panicError(source string, err error) {
 }
 
 func main() {
-	err = g.InitGL()
-	if err != nil {
-		panicError("init gl", err)
-	}
-
 	for range wCount {
 		c := &ctx{}
 		c.W, err = w.GetWindow(wWidth, wHeight, "name")
@@ -51,13 +46,18 @@ func main() {
 
 		c.PP = p.GetPrograms(c.W)
 		for _, p := range c.PP {
-			e.InitElements(c.W, p)
+			err = e.InitElements(c.W, p)
+			if err != nil {
+				panicError("elements", err)
+			}
 		}
 
 		c.V, err = e.GetVao(c.W)
 		if err != nil {
 			panicError("get vao", err)
 		}
+
+		cc = append(cc, c)
 	}
 
 	for {
@@ -73,7 +73,7 @@ func main() {
 			w.DrawTriangle(cc[i].W, cc[i].PP[0], cc[i].V)
 			glfw.DetachCurrentContext()
 
-			//time.Sleep(time.Millisecond * 500)
+			time.Sleep(time.Millisecond * 500)
 		}
 		if len(cc) == 0 {
 			break

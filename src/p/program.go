@@ -40,9 +40,7 @@ func GetPrograms(window *glfw.Window) (programs []uint32) {
 	window.MakeContextCurrent()
 
 	programs = []uint32{}
-
-	program := gl.CreateProgram()
-	programs = append(programs, program)
+	programs = append(programs, gl.CreateProgram())
 
 	return
 }
