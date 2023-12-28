@@ -43,6 +43,22 @@
             "dependsOn":[
                 "clean bin"
             ]
+        },
+        {
+            "type": "go",
+            "label": "build default",
+            "command": "build",
+			"args": [
+				"-o",
+				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\src"
+			},
+            "group": "build",
+            "dependsOn":[
+                "clean bin"
+            ]
         }
     ]
 }

@@ -1,13 +1,13 @@
-//go:build v0
-
 package e
 
 import (
 	"fmt"
 	"strings"
 	"tilinghelper/src/g"
+	"tilinghelper/src/p"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 var (
@@ -36,7 +36,10 @@ const (
 	` + "\x00"
 )
 
-func GetVao() (vao uint32, err error) {
+func GetVao(window *glfw.Window) (vao uint32, err error) {
+	defer glfw.DetachCurrentContext()
+	window.MakeContextCurrent()
+
 	if err = g.GlErrorHelper(); err != nil {
 		return
 	}
@@ -91,7 +94,10 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-func InitElements(program uint32) (err error) {
+func InitElements(window *glfw.Window, program uint32) (err error) {
+	defer glfw.DetachCurrentContext()
+	window.MakeContextCurrent()
+
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		return
@@ -105,6 +111,8 @@ func InitElements(program uint32) (err error) {
 	gl.AttachShader(program, vertexShader)
 	gl.AttachShader(program, fragmentShader)
 	gl.LinkProgram(program)
+
+	p.Validate(program)
 
 	return
 }

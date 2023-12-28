@@ -3,6 +3,7 @@ package w
 import (
 	"fmt"
 	"tilinghelper/src/g"
+	"tilinghelper/src/p"
 	"time"
 	"unsafe"
 
@@ -14,17 +15,8 @@ func Terminate() {
 	glfw.Terminate()
 }
 
-func GetWindows(count, width, height int, title string) (windows []*glfw.Window, err error) {
-	windows = []*glfw.Window{}
-	for i := 0; i < count; i++ {
-		var window *glfw.Window
-		window, err = createWindow(width, height, fmt.Sprintf("%s_%v", title, i))
-		if err != nil {
-			return
-		}
-		windows = append(windows, window)
-	}
-
+func GetWindow(width, height int, title string) (window *glfw.Window, err error) {
+	window, err = createWindow(width, height, title)
 	return
 }
 
@@ -51,23 +43,44 @@ func DrawSquare(window *glfw.Window, program uint32, vao uint32, pIndexes unsafe
 }
 
 func DrawTriangle(window *glfw.Window, program uint32, vao uint32) {
+	defer glfw.PollEvents()
+	p.Validate(program)
+
+	var err error
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	//g.GlPanicHelper("6")
+	err = g.GlErrorHelper()
+	if err != nil {
+		println("ERR draw 1:", err.Error())
+		return
+	}
 
 	gl.UseProgram(program)
-	//g.GlPanicHelper("5")
+	err = g.GlErrorHelper()
+	if err != nil {
+		println("ERR draw 2:", err.Error())
+		return
+	}
 
 	gl.BindVertexArray(vao)
-	//g.GlPanicHelper("4")
+	err = g.GlErrorHelper()
+	if err != nil {
+		println("ERR draw 3:", err.Error())
+		return
+	}
 
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(3))
-	//g.GlPanicHelper("3")
+	err = g.GlErrorHelper()
+	if err != nil {
+		println("ERR draw 4:", err.Error())
+		return
+	}
 
 	window.SwapBuffers()
-	//g.GlPanicHelper("2")
-
-	glfw.PollEvents()
-	//g.GlPanicHelper("1")
+	err = g.GlErrorHelper()
+	if err != nil {
+		println("ERR draw 5:", err.Error())
+		return
+	}
 }
 
 func createWindow(w, h int, title string) (window *glfw.Window, err error) {
@@ -98,7 +111,7 @@ func createWindow(w, h int, title string) (window *glfw.Window, err error) {
 	//window.SetAspectRatio(16, 9)
 	//SetFramebufferSizeCallback
 
-	window.MakeContextCurrent()
+	//window.MakeContextCurrent()
 
 	return
 }

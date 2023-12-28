@@ -3,19 +3,33 @@ package main
 import (
 	"os"
 	"runtime"
+
 	"tilinghelper/src/e"
 	"tilinghelper/src/g"
 	"tilinghelper/src/p"
 	"tilinghelper/src/w"
-	"time"
+
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
-	wCount  int = 4
 	wWidth  int = 800
 	wHeight int = 600
 	wTitle      = "TilingHelper"
 )
+
+var (
+	err error
+
+	wCount = make([]byte, 3)
+	cc     = []*ctx{}
+)
+
+type ctx struct {
+	W  *glfw.Window
+	PP []uint32
+	V  uint32
+}
 
 func panicError(source string, err error) {
 	println(source, err.Error())
@@ -23,86 +37,50 @@ func panicError(source string, err error) {
 }
 
 func main() {
-	go func() {
-		return
-		t := time.NewTicker(time.Millisecond * 500)
-		for _ = range t.C {
-			os.Exit(0)
-		}
-	}()
-
-	runtime.LockOSThread()
-
-	windows, err := w.GetWindows(wCount, wWidth, wHeight, wTitle)
-	if err != nil {
-		panicError("windows", err)
-	}
-	defer w.Terminate()
-
 	err = g.InitGL()
 	if err != nil {
-		panicError("g.InitGL", err)
+		panicError("init gl", err)
 	}
 
-	program, err := p.CreateProg()
-	if err != nil {
-		panicError("program", err)
-	}
-
-	// var params int32
-	// gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &params)
-	println(">>>>>>>>", program)
-
-	err = e.InitElements(program)
-	if err != nil {
-		panicError("e.InitElements", err)
-	}
-
-	vao, err := e.GetVao()
-	if err != nil {
-		panicError("vao", err)
-	}
-
-	// square, pIndexes, err := e.GetSquare()
-	// if err != nil {
-	// 	panicError("square", err)
-	// }
-
-	go func() {
-		return
-		var (
-			err error
-			i   int
-		)
-
-		for {
-			i++
-			err = g.GlErrorHelper()
-			if err != nil {
-				println("ERR:", err.Error())
-			}
+	for range wCount {
+		c := &ctx{}
+		c.W, err = w.GetWindow(wWidth, wHeight, "name")
+		if err != nil {
+			panicError("get window", err)
 		}
-	}()
+
+		c.PP = p.GetPrograms(c.W)
+		for _, p := range c.PP {
+			e.InitElements(c.W, p)
+		}
+
+		c.V, err = e.GetVao(c.W)
+		if err != nil {
+			panicError("get vao", err)
+		}
+	}
 
 	for {
-		for i, window := range windows {
-			if window.ShouldClose() {
-				window.Destroy()
-				windows = append(windows[:i], windows[i+1:]...)
+		for i := 0; i < len(cc); i++ {
+			if cc[i].W.ShouldClose() {
+				cc[i].W.Destroy()
+				cc = append(cc[:i], cc[i+1:]...)
+				i--
 				continue
 			}
-			window.MakeContextCurrent()
-			//g.GlPanicHelper("9")
-			//w.DrawSquare(window, program, square, pIndexes)
-			w.DrawTriangle(window, program, vao)
-			//g.GlPanicHelper("8")
+
+			cc[i].W.MakeContextCurrent()
+			w.DrawTriangle(cc[i].W, cc[i].PP[0], cc[i].V)
+			glfw.DetachCurrentContext()
+
+			//time.Sleep(time.Millisecond * 500)
 		}
-		if len(windows) == 0 {
+		if len(cc) == 0 {
 			break
 		}
 	}
 }
 
 func init() {
-
+	runtime.LockOSThread()
 }
