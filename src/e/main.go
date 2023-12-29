@@ -132,7 +132,3 @@ func InitElements(window *glfw.Window, program uint32) (err error) {
 
 	return
 }
-
-func init() {
-	println("v0")
-}

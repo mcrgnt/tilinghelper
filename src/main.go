@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"runtime"
-	"time"
 
 	"tilinghelper/src/e"
 	"tilinghelper/src/p"
@@ -73,7 +72,7 @@ func main() {
 			w.DrawTriangle(cc[i].W, cc[i].PP[0], cc[i].V)
 			glfw.DetachCurrentContext()
 
-			time.Sleep(time.Millisecond * 500)
+			//time.Sleep(time.Millisecond * 500)
 		}
 		if len(cc) == 0 {
 			break
