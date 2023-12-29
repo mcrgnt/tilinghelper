@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"runtime"
+	"time"
 
 	"tilinghelper/src/e"
+	"tilinghelper/src/g"
 	"tilinghelper/src/p"
 	"tilinghelper/src/w"
 
@@ -35,13 +38,24 @@ func panicError(source string, err error) {
 	os.Exit(1)
 }
 
+func exitOnTime() {
+	time.Sleep(time.Millisecond * 1600)
+	os.Exit(0)
+}
+
 func main() {
+	//go exitOnTime()
+	var prefix int
 	for range wCount {
+		name := fmt.Sprintf("window %v", prefix)
+		prefix++
+
 		c := &ctx{}
-		c.W, err = w.GetWindow(wWidth, wHeight, "name")
+		c.W, err = w.GetWindow(wWidth, wHeight, name)
 		if err != nil {
 			panicError("get window", err)
 		}
+		g.InitDebug(c.W, name)
 
 		c.PP = p.GetPrograms(c.W)
 		for _, p := range c.PP {
@@ -59,6 +73,12 @@ func main() {
 		cc = append(cc, c)
 	}
 
+	for _, c := range cc {
+		fmt.Printf("DEBUG: %+v\n", *c)
+	}
+
+	time.Sleep(time.Second)
+
 	for {
 		for i := 0; i < len(cc); i++ {
 			if cc[i].W.ShouldClose() {
@@ -69,10 +89,13 @@ func main() {
 			}
 
 			cc[i].W.MakeContextCurrent()
-			w.DrawTriangle(cc[i].W, cc[i].PP[0], cc[i].V)
+			err = w.DrawTriangle(cc[i].W, cc[i].PP[0], cc[i].V)
+			if err != nil {
+				panicError("draw:", err)
+			}
 			glfw.DetachCurrentContext()
 
-			//time.Sleep(time.Millisecond * 500)
+			time.Sleep(time.Millisecond * 500)
 		}
 		if len(cc) == 0 {
 			break

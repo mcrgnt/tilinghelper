@@ -29,10 +29,9 @@ const (
 
 	fragmentShaderSource = `
 		#version 460
-		in vec3 in_frag_colour;
 		out vec4 frag_colour;
 		void main() {
-			frag_colour = vec4(in_frag_colour, 1.0);
+			frag_colour = vec4(0.1, 0.5, 1, 1.0);
 		}
 	` + "\x00"
 )
@@ -72,31 +71,17 @@ func GetVao(window *glfw.Window) (vao uint32, err error) {
 	return
 }
 
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	// if shaderType == gl.FRAGMENT_SHADER {
-	// 	name := gl.Str("in_frag_colour" + "\x00")
-	// 	location := gl.GetUniformLocation(shader, name)
-	// 	gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
-	// 	iter++
-	// }
+func compileShader(source string, shaderType uint32) (shader uint32, err error) {
+	shader = gl.CreateShader(shaderType)
 
 	csources, free := gl.Strs(source)
 	gl.ShaderSource(shader, 1, csources, nil)
 	free()
-
-	// if shaderType == gl.FRAGMENT_SHADER {
-	// 	name := gl.Str("in_frag_colour" + "\x00")
-	// 	location := gl.GetUniformLocation(program, name)
-	// 	gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
-	// 	iter++
-	// }
-
 	gl.CompileShader(shader)
 
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
+
 	if status == gl.FALSE {
 		var logLength int32
 		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
@@ -104,10 +89,12 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
 
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
+		err = fmt.Errorf("failed to compile %v: %v", source, log)
+	} else {
+		fmt.Println("good compile", shader)
 	}
 
-	return shader, nil
+	return
 }
 
 func InitElements(window *glfw.Window, program uint32) (err error) {
@@ -129,6 +116,7 @@ func InitElements(window *glfw.Window, program uint32) (err error) {
 	gl.LinkProgram(program)
 
 	p.Validate(program)
+	p.LinkStatus(program)
 
 	return
 }

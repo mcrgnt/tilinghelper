@@ -12,14 +12,52 @@ var (
 	iter int = 0
 
 	colors = [][]float32{
+		{0.1, 0.5, 1.0},
 		{0.5, 0.6, 0.7},
 		{0.1, 0.2, 0.3},
-		{0.1, 0.5, 0.9},
 	}
 )
 
-func Terminate() {
-	glfw.Terminate()
+func DrawTriangle(window *glfw.Window, program uint32, vao uint32) (err error) {
+
+	defer glfw.PollEvents()
+
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	gl.UseProgram(program)
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	// location := gl.GetUniformLocation(program, gl.Str("in_frag_colour"+"\x00"))
+	// fmt.Println("LOCATION:", location)
+	// gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
+	// iter++
+	// if iter == 3 {
+	// 	iter = 0
+	// }
+
+	gl.BindVertexArray(vao)
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(3))
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	window.SwapBuffers()
+	err = g.GlErrorHelper()
+
+	return
 }
 
 func GetWindow(width, height int, title string) (window *glfw.Window, err error) {
@@ -145,49 +183,6 @@ func mouseCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Act
 	println("click:", button, mouseCallbackHelper[action], mod)
 }
 
-func DrawTriangle(window *glfw.Window, program uint32, vao uint32) {
-	defer glfw.PollEvents()
-
-	var err error
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	err = g.GlErrorHelper()
-	if err != nil {
-		println("ERR draw 1:", err.Error())
-		return
-	}
-
-	gl.UseProgram(program)
-	err = g.GlErrorHelper()
-	if err != nil {
-		println("ERR draw 2:", err.Error())
-		return
-	}
-
-	location := gl.GetUniformLocation(program, gl.Str("in_frag_colour"+"\x00"))
-	gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
-	iter++
-	if iter == 3 {
-		iter = 0
-	}
-
-	gl.BindVertexArray(vao)
-	err = g.GlErrorHelper()
-	if err != nil {
-		println("ERR draw 3:", err.Error())
-		return
-	}
-
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(3))
-	err = g.GlErrorHelper()
-	if err != nil {
-		println("ERR draw 4:", err.Error())
-		return
-	}
-
-	window.SwapBuffers()
-	err = g.GlErrorHelper()
-	if err != nil {
-		println("ERR draw 5:", err.Error())
-		return
-	}
+func Terminate() {
+	glfw.Terminate()
 }
