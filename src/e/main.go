@@ -27,11 +27,13 @@ const (
 		}
 	` + "\x00"
 
+	uniform
 	fragmentShaderSource = `
 		#version 460
-		out vec4 frag_colour;
+		uniform vec4 inDiffuseColor;
+		out vec4 outDiffuseColor;
 		void main() {
-			frag_colour = vec4(0.1, 0.5, 1, 1.0);
+			outDiffuseColor = vec4(inDiffuseColor);
 		}
 	` + "\x00"
 )

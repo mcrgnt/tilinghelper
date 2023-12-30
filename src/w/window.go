@@ -1,6 +1,7 @@
 package w
 
 import (
+	"fmt"
 	"tilinghelper/src/g"
 	"time"
 
@@ -12,11 +13,27 @@ var (
 	iter int = 0
 
 	colors = [][]float32{
-		{0.1, 0.5, 1.0},
-		{0.5, 0.6, 0.7},
-		{0.1, 0.2, 0.3},
+		{0.1, 0.3, 1.0, 0.5},
+		{0.5, 0.6, 0.7, 1.0},
+		{0.1, 0.2, 0.3, 1.0},
 	}
 )
+
+func init() {
+	go func() {
+		t := time.NewTicker(time.Second)
+		for range t.C {
+			fmt.Println(">>")
+			for i := range colors {
+				if colors[i][3] == 0.0 {
+					colors[i][3] = 1.0
+				} else {
+					colors[i][3] = 0.0
+				}
+			}
+		}
+	}()
+}
 
 func DrawTriangle(window *glfw.Window, program uint32, vao uint32) (err error) {
 
@@ -27,6 +44,7 @@ func DrawTriangle(window *glfw.Window, program uint32, vao uint32) (err error) {
 	if err != nil {
 		return
 	}
+	gl.ClearColor(0.1, 0.5, 1.0, 0.5)
 
 	gl.UseProgram(program)
 	err = g.GlErrorHelper()
@@ -34,13 +52,22 @@ func DrawTriangle(window *glfw.Window, program uint32, vao uint32) (err error) {
 		return
 	}
 
-	// location := gl.GetUniformLocation(program, gl.Str("in_frag_colour"+"\x00"))
-	// fmt.Println("LOCATION:", location)
-	// gl.Uniform3f(location, colors[iter][0], colors[iter][1], colors[iter][2])
-	// iter++
-	// if iter == 3 {
-	// 	iter = 0
-	// }
+	location := gl.GetUniformLocation(program, gl.Str("inDiffuseColor\x00"))
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	gl.Uniform4f(location, colors[iter][0], colors[iter][1], colors[iter][2], colors[iter][3])
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	iter++
+	if iter == 3 {
+		iter = 0
+	}
 
 	gl.BindVertexArray(vao)
 	err = g.GlErrorHelper()
@@ -75,9 +102,10 @@ func createWindow(w, h int, title string) (window *glfw.Window, err error) {
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 6)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	//glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	//glfw.WindowHint(glfw.Maximized, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
+	//glfw.WindowHint(glfw.Blend, glfw.True)
 
 	window, err = glfw.CreateWindow(w, h, title, nil, nil)
 	if err != nil {

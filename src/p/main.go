@@ -32,7 +32,7 @@ func LinkStatus(program uint32) {
 	fmt.Println("Log:", program, infoLog)
 
 	// The program is useless now. So delete it.
-	gl.DeleteProgram(program)
+	//gl.DeleteProgram(program)
 }
 
 func GetPrograms(window *glfw.Window) (programs []uint32) {

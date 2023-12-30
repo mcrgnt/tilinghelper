@@ -95,7 +95,7 @@ func main() {
 			}
 			glfw.DetachCurrentContext()
 
-			time.Sleep(time.Millisecond * 500)
+			//time.Sleep(time.Millisecond * 1000)
 		}
 		if len(cc) == 0 {
 			break
