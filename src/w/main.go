@@ -18,7 +18,7 @@ var (
 
 	colors = [][]float32{
 		{0.1, 0.3, 1.0, 0.5},
-		{0.5, 0.6, 0.7, 1.0},
+		{0.5, 0.6, 0.7, 0.1},
 		{0.1, 0.2, 0.3, 1.0},
 	}
 )
@@ -183,7 +183,13 @@ func createWindow(w, h int, title string) (window *glfw.Window, err error) {
 			return
 		}
 		gl.Enable(gl.DEPTH_TEST)
+		gl.Enable(gl.LINE_SMOOTH)
+		gl.Enable(gl.POLYGON_SMOOTH)
+		// gl.Hint(gl.POLYGON_SMOOTH, gl.NICEST)
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
+	//glfw.SwapInterval(144)
 	glfw.DetachCurrentContext()
 
 	return
