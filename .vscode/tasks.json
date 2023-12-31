@@ -6,20 +6,35 @@
             "type": "shell",
             "group": "build",
             "command":"rm",
-            "args": ["bin\\*"]
+            "options": {
+				"cwd": "${workspaceFolder}\\bin"
+			},
+            "args": ["*"]
         },
         {
+            "label": "clean cache",
             "type": "go",
+            "command": "clean",
+			"args": [
+				"-cache"
+			],
+            "group": "build",
+            "dependsOn":[
+                "clean bin"
+            ]
+        },
+        {
             "label": "build v1",
+            "type": "go",
             "command": "build",
 			"args": [
                 "-tags",
                 "v1",
 				"-o",
-				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
+				"${workspaceFolder}\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}\\src"
+				"cwd": "${workspaceFolder}\\cmd\\tilinghelper"
 			},
             "group": "build",
             "dependsOn":[
@@ -27,17 +42,17 @@
             ]
         },
         {
-            "type": "go",
             "label": "build v0",
+            "type": "go",
             "command": "build",
 			"args": [
                 "-tags",
                 "v0",
 				"-o",
-				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
+				"${workspaceFolder}\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}\\src"
+				"cwd": "${workspaceFolder}\\cmd\\tilinghelper"
 			},
             "group": "build",
             "dependsOn":[
@@ -45,19 +60,35 @@
             ]
         },
         {
-            "type": "go",
             "label": "build default",
+            "type": "go",
             "command": "build",
 			"args": [
 				"-o",
-				"..\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
+				"${workspaceFolder}\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}\\src"
+				"cwd": "${workspaceFolder}\\cmd\\tilinghelper"
 			},
             "group": "build",
             "dependsOn":[
                 "clean bin"
+            ]
+        },
+        {
+            "label": "clean cache && build default",
+            "type": "go",
+            "command": "build",
+			"args": [
+				"-o",
+				"${workspaceFolder}\\bin\\tilinghelper-${config:from_branch}_${config:to_branch}.exe"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\cmd\\tilinghelper"
+			},
+            "group": "build",
+            "dependsOn":[
+                "clean cache"
             ]
         }
     ]
