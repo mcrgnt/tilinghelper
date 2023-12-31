@@ -1,12 +1,16 @@
 package w
 
 import (
-	"fmt"
 	"tilinghelper/src/g"
 	"time"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+)
+
+var (
+	initGLFW bool
+	initGL   bool
 )
 
 var (
@@ -19,32 +23,18 @@ var (
 	}
 )
 
-func init() {
-	go func() {
-		t := time.NewTicker(time.Second)
-		for range t.C {
-			fmt.Println(">>")
-			for i := range colors {
-				if colors[i][3] == 0.0 {
-					colors[i][3] = 1.0
-				} else {
-					colors[i][3] = 0.0
-				}
-			}
-		}
-	}()
-}
-
-func DrawTriangle(window *glfw.Window, program uint32, vao uint32) (err error) {
+func DrawTriangle(clear bool, swap bool, window *glfw.Window, program uint32, vao uint32) (err error) {
 
 	defer glfw.PollEvents()
 
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	err = g.GlErrorHelper()
-	if err != nil {
-		return
+	if clear {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		err = g.GlErrorHelper()
+		if err != nil {
+			return
+		}
+		gl.ClearColor(0.1, 0.5, 1.0, 0.5)
 	}
-	gl.ClearColor(0.1, 0.5, 1.0, 0.5)
 
 	gl.UseProgram(program)
 	err = g.GlErrorHelper()
@@ -81,8 +71,70 @@ func DrawTriangle(window *glfw.Window, program uint32, vao uint32) (err error) {
 		return
 	}
 
-	window.SwapBuffers()
+	if swap {
+		window.SwapBuffers()
+		err = g.GlErrorHelper()
+	}
+
+	return
+}
+
+func DrawRectangle(clear bool, swap bool, window *glfw.Window, program uint32, ebo uint32) (err error) {
+	defer glfw.PollEvents()
+
+	if clear {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		err = g.GlErrorHelper()
+		if err != nil {
+			return
+		}
+		gl.ClearColor(0.1, 0.5, 1.0, 0.5)
+	}
+
+	gl.UseProgram(program)
 	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	location := gl.GetUniformLocation(program, gl.Str("inDiffuseColor\x00"))
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	gl.Uniform4f(location, colors[iter][0], colors[iter][1], colors[iter][2], colors[iter][3])
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	iter++
+	if iter == 3 {
+		iter = 0
+	}
+
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	gl.BindVertexArray(ebo)
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	gl.DrawElements(gl.TRIANGLES, int32(6), gl.UNSIGNED_INT, nil)
+	err = g.GlErrorHelper()
+	if err != nil {
+		return
+	}
+
+	if swap {
+		window.SwapBuffers()
+		err = g.GlErrorHelper()
+	}
 
 	return
 }
@@ -93,9 +145,11 @@ func GetWindow(width, height int, title string) (window *glfw.Window, err error)
 }
 
 func createWindow(w, h int, title string) (window *glfw.Window, err error) {
-	err = glfw.Init()
-	if err != nil {
-		return
+	if !initGLFW {
+		err = glfw.Init()
+		if err != nil {
+			return
+		}
 	}
 
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -123,9 +177,12 @@ func createWindow(w, h int, title string) (window *glfw.Window, err error) {
 	//SetFramebufferSizeCallback
 
 	window.MakeContextCurrent()
-	err = gl.Init()
-	if err != nil {
-		return
+	if !initGL {
+		err = gl.Init()
+		if err != nil {
+			return
+		}
+		gl.Enable(gl.DEPTH_TEST)
 	}
 	glfw.DetachCurrentContext()
 

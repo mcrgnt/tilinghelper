@@ -11,20 +11,29 @@ import (
 )
 
 var (
-	triangle = []float32{
-		-0.5, 0.5, 0.5,
-		-0.5, -0.5, 0.5,
-		0.5, -0.5, 0.5,
+	z        float32 = -0.9
+	triangle         = []float32{
+		-0.5, 0.5, z,
+		-0.5, -0.5, z,
+		0.5, -0.5, z,
 	}
 )
 
 const (
+	// vertexShaderSource = `
+	// 	#version 460
+	// 	in vec3 vp;
+	// 	void main() {
+	// 		gl_Position = vec4(vp, 1.0);
+	// 	}
+	// ` + "\x00"
+
 	vertexShaderSource = `
-		#version 460
-		in vec3 vp;
-		void main() {
-			gl_Position = vec4(vp, 1.0);
-		}
+	#version 460
+	in vec3 vp;
+	void main() {
+	gl_Position = vec4(vp, 1.0);
+	}
 	` + "\x00"
 
 	uniform
@@ -33,10 +42,50 @@ const (
 		uniform vec4 inDiffuseColor;
 		out vec4 outDiffuseColor;
 		void main() {
-			outDiffuseColor = vec4(inDiffuseColor);
+			outDiffuseColor = inDiffuseColor;
 		}
 	` + "\x00"
 )
+
+func GetEbo(window *glfw.Window) (vao uint32, err error) {
+	defer glfw.DetachCurrentContext()
+	window.MakeContextCurrent()
+
+	if err = g.GlErrorHelper(); err != nil {
+		return
+	}
+
+	var z float32 = 0.9
+
+	vertices := []float32{
+		-0.6, -0.6, z,
+		-0.6, 0.4, z,
+		0.4, 0.4, z,
+		0.4, -0.6, z,
+	}
+
+	indices := []uint32{0, 1, 2, 2, 3, 0}
+
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
+
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(vertices), gl.Ptr(vertices), gl.STATIC_DRAW)
+
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, int32(0), uintptr(0))
+	gl.EnableVertexAttribArray(0)
+
+	var ebo uint32
+	gl.GenBuffers(1, &ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 4*len(indices), gl.Ptr(indices), gl.STATIC_DRAW)
+
+	gl.BindVertexArray(0)
+
+	return
+}
 
 func GetVao(window *glfw.Window) (vao uint32, err error) {
 	defer glfw.DetachCurrentContext()
@@ -69,6 +118,8 @@ func GetVao(window *glfw.Window) (vao uint32, err error) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	// set attributes?
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+
+	gl.BindVertexArray(0)
 
 	return
 }
